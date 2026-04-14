@@ -27,7 +27,7 @@ st.title("🔍 Busca tu Parte")
 st.write("Consulta centralizada de infracciones de tránsito.")
 
 # Entrada de datos
-patente = st.text_input("Ingrese patente (ej: TPVL82)", placeholder="ABCD12").upper().strip().replace("-", "")
+patente = st.text_input("Ingrese patente (ej: ABCD12 O AB1234)", placeholder="ABCD12").upper().strip().replace("-", "")
 
 if st.button("Buscar en todas las municipalidades"):
     if len(patente) >= 6:
