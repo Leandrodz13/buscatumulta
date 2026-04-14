@@ -4,10 +4,6 @@ import pandas as pd
 import os
 import sys
 
-# 1. Instalación automática de motor en Streamlit Cloud
-# Esto asegura que el navegador esté listo antes de cualquier búsqueda
-if not os.path.exists("/home/appuser/.cache/ms-playwright"):
-    os.system("playwright install chromium")
 
 # 2. Asegurar rutas de módulos para encontrar la carpeta 'comunas'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
