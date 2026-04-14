@@ -3,7 +3,20 @@ import asyncio
 import pandas as pd
 import os
 import sys
+import subprocess
 
+# --- BLOQUE DE INSTALACIÓN AUTOMÁTICA DE NAVEGADOR ---
+# Esto descarga el ejecutable de Chromium que falta en el servidor de Streamlit
+def instalar_playwright():
+    try:
+        # Verificamos si el navegador ya existe en el cache para no re-descargar siempre
+        if not os.path.exists("/home/appuser/.cache/ms-playwright"):
+            subprocess.run(["playwright", "install", "chromium"], check=True)
+    except Exception as e:
+        st.error(f"Error instalando el motor de búsqueda: {e}")
+
+instalar_playwright()
+# ---------------------------------------------------
 
 # 2. Asegurar rutas de módulos para encontrar la carpeta 'comunas'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +48,6 @@ if st.button("Buscar en todas las municipalidades"):
         for nombre_comuna, funcion in comunas:
             with st.spinner(f"Consultando {nombre_comuna}... (El portal municipal es lento, por favor espera)"):
                 try:
-                    # --- CORRECCIÓN CLAVE AQUÍ ---
                     # Usamos asyncio.run() directamente para ser compatibles con el servidor
                     pend, pag, msg = asyncio.run(funcion(patente))
 
@@ -49,7 +61,6 @@ if st.button("Buscar en todas las municipalidades"):
                             st.markdown("### 🚩 Por Pagar")
                             if pend:
                                 df_pend = pd.DataFrame(pend)
-                                # Intentamos asignar nombres de columnas si la tabla trae los 11 campos esperados
                                 if len(df_pend.columns) >= 11:
                                     df_pend.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Vence", "Rol", "Estado"]
                                     st.dataframe(df_pend.drop(columns=["Acción"]), use_container_width=True)
@@ -70,11 +81,9 @@ if st.button("Buscar en todas las municipalidades"):
                             else:
                                 st.info("No hay registro de multas pagadas.")
                     else:
-                        # Si el bot captura un error de tiempo o de la página, lo muestra aquí de forma elegante
                         st.warning(f"Aviso de {nombre_comuna}: {msg}")
 
                 except Exception as e:
-                    # Esto nos mostrará el error técnico real si algo falla en el servidor
                     st.error(f"Error técnico al conectar con {nombre_comuna}: {str(e)}")
     else:
         st.warning("Ingrese una patente válida de 6 caracteres.")
