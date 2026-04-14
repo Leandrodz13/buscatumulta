@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from comunas.santiago import consultar_santiago
 
 # Configuración de página
-st.set_page_config(page_title="Busca Tu Multa", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Busca Tu Parte", page_icon="🔍", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,7 +23,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🔍 Busca tu Multa")
+st.title("🔍 Busca tu Parte")
 st.write("Consulta centralizada de infracciones de tránsito.")
 
 # Entrada de datos
@@ -78,7 +78,7 @@ if st.button("Buscar en todas las municipalidades"):
 # Footer
 st.markdown("""
 <div class="disclaimer">
-    <b>Aviso Legal:</b> buscatumulta.cl es una herramienta independiente. Los datos son obtenidos de portales públicos. 
+    <b>Aviso Legal:</b> buscatuparte.cl es una herramienta independiente. Los datos son obtenidos de portales públicos. 
     Esta plataforma no procesa pagos. Ante dudas, contacte al Juzgado de Policía Local.
 </div>
 """, unsafe_allow_html=True)
