@@ -6,12 +6,15 @@ import sys
 import subprocess
 
 # --- BLOQUE DE INSTALACIÓN AUTOMÁTICA DE NAVEGADOR ---
-# Esto descarga el ejecutable de Chromium que falta en el servidor de Streamlit
+# Esto descarga el ejecutable de Chromium y las librerías de sistema faltantes
 def instalar_playwright():
     try:
-        # Verificamos si el navegador ya existe en el cache para no re-descargar siempre
+        # Verificamos si el navegador ya existe en el cache
         if not os.path.exists("/home/appuser/.cache/ms-playwright"):
+            # 1. Instala el binario del navegador
             subprocess.run(["playwright", "install", "chromium"], check=True)
+            # 2. Instala las dependencias de sistema (libasound, libgbm, etc.)
+            subprocess.run(["playwright", "install-deps"], check=True)
     except Exception as e:
         st.error(f"Error instalando el motor de búsqueda: {e}")
 
