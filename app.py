@@ -4,73 +4,81 @@ import pandas as pd
 import os
 import sys
 
-# --- CONFIGURACIÓN DE ENTORNO ---
-# Instalación automática de Playwright en el servidor de Streamlit
+# Instalación automática de motor en Streamlit Cloud
 if not os.path.exists("/home/appuser/.cache/ms-playwright"):
-    try:
-        os.system("playwright install chromium")
-    except Exception as e:
-        st.error(f"Error instalando dependencias: {e}")
+    os.system("playwright install chromium")
 
-# Asegurar que Python encuentre la carpeta 'comunas'
+# Asegurar rutas de módulos
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from comunas.santiago import consultar_santiago
 
-# --- INTERFAZ VISUAL ---
-st.set_page_config(page_title="Busca Tu Multa", page_icon="🔍", layout="centered")
+# Configuración de página
+st.set_page_config(page_title="Busca Tu Multa", page_icon="🔍", layout="wide")
 
 st.markdown("""
     <style>
-    .stButton>button { width: 100%; background-color: #022873; color: white; border-radius: 10px; height: 3em; font-weight: bold; }
-    .disclaimer { font-size: 11px; color: #666; text-align: justify; margin-top: 50px; line-height: 1.4; }
+    .stButton>button { width: 100%; background-color: #022873; color: white; border-radius: 10px; font-weight: bold; height: 3em; }
+    .disclaimer { font-size: 11px; color: #666; text-align: justify; margin-top: 50px; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🔍 Busca tu Multa")
-st.write("Consulta centralizada de infracciones de tránsito en Chile.")
+st.write("Consulta centralizada de infracciones de tránsito.")
 
-patente = st.text_input("Ingrese patente", placeholder="Ej: ABCD12 o AB1234").upper().strip().replace("-", "")
+# Entrada de datos
+patente = st.text_input("Ingrese patente (ej: TPVL82)", placeholder="ABCD12").upper().strip().replace("-", "")
 
 if st.button("Buscar en todas las municipalidades"):
     if len(patente) >= 6:
-        # Registro de comunas disponibles
-        tareas = [
-            ("Santiago", consultar_santiago),
-        ]
+        # Lista de comunas a consultar
+        comunas = [("Santiago", consultar_santiago)]
         
-        resultados_totales = False
-        
-        for nombre_comuna, funcion_busqueda in tareas:
-            with st.expander(f"Resultados en {nombre_comuna}", expanded=True):
-                with st.spinner(f"Consultando base de datos de {nombre_comuna}..."):
-                    try:
-                        # Manejo de bucle asíncrono compatible con Streamlit Cloud
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        df, msg = loop.run_until_complete(funcion_busqueda(patente))
-                        loop.close()
-                        
-                        if df is not None:
-                            st.dataframe(df, use_container_width=True)
-                            resultados_totales = True
-                        else:
-                            st.info(f"✅ {msg}")
-                    except Exception as e:
-                        st.error(f"La conexión con {nombre_comuna} tardó demasiado o falló.")
-        
-        if not resultados_totales:
-            st.toast("Búsqueda finalizada sin multas pendientes.")
-            
-    else:
-        st.warning("Por favor, ingrese una patente válida (6 caracteres).")
+        for nombre_comuna, funcion in comunas:
+            with st.spinner(f"Consultando {nombre_comuna}... (Este portal suele ser lento, por favor espera)"):
+                try:
+                    # Ejecución del bot
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    pend, pag, msg = loop.run_until_complete(funcion(patente))
+                    loop.close()
 
-# --- FOOTER ---
-st.markdown("---")
+                    if msg == "Éxito":
+                        st.subheader(f"📍 Municipio: {nombre_comuna}")
+                        
+                        # Creamos dos columnas para mostrar todo ordenado
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown("### 🚩 Por Pagar")
+                            if pend:
+                                df_pend = pd.DataFrame(pend)
+                                # Ajustamos nombres de columnas básicos
+                                df_pend.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Vence", "Rol", "Estado"]
+                                st.dataframe(df_pend.drop(columns=["Acción"]), use_container_width=True)
+                            else:
+                                st.success("No se registran multas pendientes.")
+
+                        with col2:
+                            st.markdown("### ✅ Historial de Pagadas")
+                            if pag:
+                                df_pag = pd.DataFrame(pag)
+                                df_pag.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Pago", "Rol", "Estado"]
+                                st.dataframe(df_pag.drop(columns=["Acción"]), use_container_width=True)
+                            else:
+                                st.info("No hay registro de multas pagadas.")
+                    else:
+                        st.error(f"Fallo en {nombre_comuna}: {msg}")
+
+                except Exception as e:
+                    st.error(f"Error crítico al consultar {nombre_comuna}.")
+    else:
+        st.warning("Ingrese una patente válida.")
+
+# Footer
 st.markdown("""
 <div class="disclaimer">
-    <b>Aviso Legal:</b> buscatumulta.cl es una plataforma independiente y no gubernamental. 
-    Los datos mostrados son de carácter referencial, obtenidos en tiempo real desde portales públicos municipales. 
-    Esta aplicación no realiza cobros ni gestiona pagos; para trámites oficiales, diríjase al Juzgado de Policía Local respectivo.
+    <b>Aviso Legal:</b> buscatumulta.cl es una herramienta independiente. Los datos son obtenidos de portales públicos. 
+    Esta plataforma no procesa pagos. Ante dudas, contacte al Juzgado de Policía Local.
 </div>
 """, unsafe_allow_html=True)
