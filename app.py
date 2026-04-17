@@ -6,14 +6,10 @@ import sys
 import subprocess
 
 # --- BLOQUE DE INSTALACIÓN AUTOMÁTICA DE NAVEGADOR ---
-# Esto descarga el ejecutable de Chromium y las librerías de sistema faltantes
 def instalar_playwright():
     try:
-        # Verificamos si el navegador ya existe en el cache
         if not os.path.exists("/home/appuser/.cache/ms-playwright"):
-            # 1. Instala el binario del navegador
             subprocess.run(["playwright", "install", "chromium"], check=True)
-            # 2. Instala las dependencias de sistema (libasound, libgbm, etc.)
             subprocess.run(["playwright", "install-deps"], check=True)
     except Exception as e:
         st.error(f"Error instalando el motor de búsqueda: {e}")
@@ -25,6 +21,7 @@ instalar_playwright()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from comunas.santiago import consultar_santiago
+from comunas.providencia import consultar_providencia  # <-- Importamos Providencia
 
 # 3. Configuración de página
 st.set_page_config(page_title="Busca Tu Parte", page_icon="🔍", layout="wide")
@@ -45,32 +42,33 @@ patente = st.text_input("Ingrese patente (ej: ABCD12 O AB1234)", placeholder="AB
 
 if st.button("Buscar en todas las municipalidades"):
     if len(patente) >= 6:
-        # Registro de comunas
-        comunas = [("Santiago", consultar_santiago)]
+        # Registro de comunas (Ahora con Providencia)
+        comunas = [
+            ("Santiago", consultar_santiago),
+            ("Providencia", consultar_providencia)
+        ]
         
         for nombre_comuna, funcion in comunas:
             with st.spinner(f"Consultando {nombre_comuna}... (El portal municipal es lento, por favor espera)"):
                 try:
-                    # Usamos asyncio.run() directamente para ser compatibles con el servidor
                     pend, pag, msg = asyncio.run(funcion(patente))
 
                     if msg == "Éxito":
                         st.subheader(f"📍 Municipio: {nombre_comuna}")
-                        
-                        # Layout de dos columnas
                         col1, col2 = st.columns(2)
                         
                         with col1:
-                            st.markdown("### 🚩 Por Pagar")
+                            st.markdown("### 🚩 Por Pagar / Pendientes")
                             if pend:
                                 df_pend = pd.DataFrame(pend)
+                                # Lógica de columnas para Santiago o Providencia (SMC)
                                 if len(df_pend.columns) >= 11:
                                     df_pend.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Vence", "Rol", "Estado"]
                                     st.dataframe(df_pend.drop(columns=["Acción"]), use_container_width=True)
                                 else:
                                     st.dataframe(df_pend, use_container_width=True)
                             else:
-                                st.success("No se registran multas pendientes.")
+                                st.success(f"No se registran multas pendientes en {nombre_comuna}.")
 
                         with col2:
                             st.markdown("### ✅ Historial de Pagadas")
@@ -82,7 +80,8 @@ if st.button("Buscar en todas las municipalidades"):
                                 else:
                                     st.dataframe(df_pag, use_container_width=True)
                             else:
-                                st.info("No hay registro de multas pagadas.")
+                                st.info(f"No hay registro de multas pagadas en {nombre_comuna}.")
+                        st.markdown("---")
                     else:
                         st.warning(f"Aviso de {nombre_comuna}: {msg}")
 
