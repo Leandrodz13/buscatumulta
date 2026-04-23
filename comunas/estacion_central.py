@@ -85,7 +85,7 @@ async def consultar_estacion_central(patente):
 
         except Exception as e:
             if "Timeout" in str(e):
-                return [], [], "Estación Central: El servidor no respondió (Timeout Agresivo)."
+                return [], [], "Estación Central: Aún no está disponible en nuestra web."
             return [], [], f"Error Estación Central: {str(e)}"
         finally:
             await browser.close()
