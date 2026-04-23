@@ -57,7 +57,7 @@ async def consultar_pudahuel(patente):
 
         except Exception as e:
             if "Timeout" in str(e):
-                return [], [], "El portal de Pudahuel no respondió (Servidor lento o caído)."
+                return [], [], "Aún no está disponible en nuestra web"
             return [], [], f"Error Pudahuel: {str(e)}"
         finally:
             await browser.close()
