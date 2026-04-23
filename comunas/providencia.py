@@ -59,7 +59,7 @@ async def consultar_providencia(patente):
 
         except Exception as e:
             if "Timeout" in str(e):
-                return [], [], "Providencia: Aún no está disponible en nuestra web."
+                return [], [], "Este municipio aún no está disponible en nuestra web"
             return [], [], f"Error Providencia: {str(e)}"
         finally:
             await browser.close()
