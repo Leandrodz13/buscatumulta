@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from comunas.santiago import consultar_santiago
 from comunas.providencia import consultar_providencia
-from comunas.pudahuel import consultar_pudahuel # <-- Importamos Providencia
+from comunas.pudahuel import consultar_pudahuel
 from comunas.nunoa import consultar_nunoa
 
 # 3. Configuración de página
@@ -44,7 +44,7 @@ patente = st.text_input("Ingrese patente (ej: ABCD12 O AB1234)", placeholder="AB
 
 if st.button("Buscar en todas las municipalidades"):
     if len(patente) >= 6:
-        # Registro de comunas (Ahora con Providencia)
+        # Registro de comunas
         comunas = [
             ("Santiago", consultar_santiago),
             ("Providencia", consultar_providencia),
@@ -65,11 +65,12 @@ if st.button("Buscar en todas las municipalidades"):
                             st.markdown("### 🚩 Por Pagar / Pendientes")
                             if pend:
                                 df_pend = pd.DataFrame(pend)
-                                # Lógica de columnas para Santiago o Providencia (SMC)
-                                if len(df_pend.columns) >= 11:
+                                # CORRECCIÓN: Validamos el largo exacto para evitar el error de Ñuñoa
+                                if len(df_pend.columns) == 11:
                                     df_pend.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Vence", "Rol", "Estado"]
                                     st.dataframe(df_pend.drop(columns=["Acción"]), use_container_width=True)
                                 else:
+                                    # Si no tiene 11 (como Ñuñoa), la muestra tal cual sin romperse
                                     st.dataframe(df_pend, use_container_width=True)
                             else:
                                 st.success(f"No se registran multas pendientes en {nombre_comuna}.")
@@ -78,7 +79,8 @@ if st.button("Buscar en todas las municipalidades"):
                             st.markdown("### ✅ Historial de Pagadas")
                             if pag:
                                 df_pag = pd.DataFrame(pag)
-                                if len(df_pag.columns) >= 11:
+                                # CORRECCIÓN: Validamos el largo exacto
+                                if len(df_pag.columns) == 11:
                                     df_pag.columns = ["Acción", "Emisión", "Juzgado", "PPU", "Monto", "Denuncia", "Infracción", "RUT", "Pago", "Rol", "Estado"]
                                     st.dataframe(df_pag.drop(columns=["Acción"]), use_container_width=True)
                                 else:
