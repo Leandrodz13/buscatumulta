@@ -23,6 +23,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from comunas.santiago import consultar_santiago
 from comunas.nunoa import consultar_nunoa
 from comunas.estacion_central import consultar_estacion_central
+from comunas.providencia import consultar_providencia
+from comunas.pudahuel import consultar_pudahuel
 
 # 3. Configuración de página
 st.set_page_config(page_title="Busca Tu Parte", page_icon="🔍", layout="wide")
