@@ -8,5 +8,3 @@ Están desactivadas algunas comunas, ya que fueron borradas del bloque (from com
 estas son:
 - Providencia
 - Pudahuel
-- Maipú
-- 
