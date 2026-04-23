@@ -21,8 +21,6 @@ instalar_playwright()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from comunas.santiago import consultar_santiago
-from comunas.providencia import consultar_providencia
-from comunas.pudahuel import consultar_pudahuel
 from comunas.nunoa import consultar_nunoa
 from comunas.estacion_central import consultar_estacion_central
 
