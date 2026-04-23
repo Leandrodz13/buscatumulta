@@ -21,7 +21,8 @@ instalar_playwright()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from comunas.santiago import consultar_santiago
-from comunas.providencia import consultar_providencia  # <-- Importamos Providencia
+from comunas.providencia import consultar_providencia
+from comunas.pudahuel import consultar_pudahuel# <-- Importamos Providencia
 
 # 3. Configuración de página
 st.set_page_config(page_title="Busca Tu Parte", page_icon="🔍", layout="wide")
@@ -45,7 +46,8 @@ if st.button("Buscar en todas las municipalidades"):
         # Registro de comunas (Ahora con Providencia)
         comunas = [
             ("Santiago", consultar_santiago),
-            ("Providencia", consultar_providencia)
+            ("Providencia", consultar_providencia),
+            ("Pudahuel", consultar_pudahuel)
         ]
         
         for nombre_comuna, funcion in comunas:
