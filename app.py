@@ -24,6 +24,7 @@ from comunas.santiago import consultar_santiago
 from comunas.providencia import consultar_providencia
 from comunas.pudahuel import consultar_pudahuel
 from comunas.nunoa import consultar_nunoa
+from comunas.estacion_central import consultar_estacion_central
 
 # 3. Configuración de página
 st.set_page_config(page_title="Busca Tu Parte", page_icon="🔍", layout="wide")
@@ -49,7 +50,8 @@ if st.button("Buscar en todas las municipalidades"):
             ("Santiago", consultar_santiago),
             ("Providencia", consultar_providencia),
             ("Pudahuel", consultar_pudahuel),
-            ("Nuñoa", consultar_nunoa)
+            ("Nuñoa", consultar_nunoa),
+            ("Estación Central", consultar_estacion_central)
         ]
         
         for nombre_comuna, funcion in comunas:
